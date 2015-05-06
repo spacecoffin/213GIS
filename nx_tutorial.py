@@ -7,9 +7,9 @@ G = nx.graph()
 G.add_node(1)
 
 # Add a list of nodes
-G.add_nodes_from([2,3])
+G.add_nodes_from([2, 3])
 
 # Or add any nbunch of nodes
 # Nbunch = iterable container of nodes that is not itself a node in the graph (e.g. a list, set, graph, file, etc.)
-H=nx.path_graph(10)
+H = nx.path_graph(10)
 G.add_nodes_from(H)
