@@ -1,7 +1,7 @@
 import networkx as nx
 
 # Create an empty graph with no nodes or edges
-G = nx.graph()
+G = nx.Graph()
 
 # Add one node
 G.add_node(1)
