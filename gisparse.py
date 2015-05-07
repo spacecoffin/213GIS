@@ -15,12 +15,18 @@ if __name__ == '__main__':
 
     while True:
         line = file.readline()
-        if not line:    # check for EOF
-            break
-        if line[0] is '*':
+        if line[0] == '*':
             continue
         else:
-            line.strip()
+            break
+
+    for char in file.read():
+        city = []
+        while char.isalpha():
+            city.append(char)
+            char = file.read(1)
+        print(city)
+
 
 
     file.close()
