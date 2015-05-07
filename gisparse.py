@@ -13,17 +13,15 @@ if __name__ == '__main__':
     # Solution: If line begins with '*' char, go to the next line without
     # storing any data.
 
-    line = [w.rstrip('\n') for w in file.readlines()]
-
-
     while True:
-        line = file.readline().rstrip('\n')
+        line = file.readline()
         if not line:    # check for EOF
             break
-        if line[1] is '*':
+        if line[0] is '*':
             continue
         else:
-            print(line)
+            line.strip()
+
 
     file.close()
 
@@ -64,4 +62,3 @@ if __name__ == '__main__':
     # self.words = [w.rstrip('\n') for w in file.readlines()]
     # self.mapper = {}
     # self.keepwords = []
-
