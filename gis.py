@@ -17,7 +17,7 @@ class Gis:
         citystate = ''
         getcontext().prec = 5
 
-        with open('gis.dat') as gisf:
+        with open('testgis.dat') as gisf:
             getcontext().prec = 5
             for line in gisf.readlines():
                 if line.startswith('*'):
@@ -83,8 +83,6 @@ class Gis:
             print('"{}" is not a valid attribute.\nPlease enter one of '
                   '"name", "state", "latitude", "longitude" or '
                   '"population".'.format(attribute))
-
-        return ()
 
     def selectAllCities(self):
         # Select all cities.
