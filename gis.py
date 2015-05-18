@@ -28,10 +28,10 @@ class Gis:
                     (city, state) = citystate.split(', ')
                     (latlon, pop) = citydata.split(']')
                     (lat, lon) = latlon.split(',')
-                    self.G.add_node(citystate, name=citystate, state=state,
-                               lat=float(Decimal(lat) * Decimal(0.01)),
-                               lon=float(Decimal(lon) * Decimal(0.01)),
-                               pop=int(pop.rstrip()))
+                    self.G.add_node(citystate, state=state, name=citystate,
+                               latitude=float(Decimal(lat) * Decimal(0.01)),
+                               longitude=float(Decimal(lon) * Decimal(0.01)),
+                               population=int(pop.rstrip()))
                     self.citylist.insert(0, citystate)
                 if line[0].isdigit():
                     i=0
@@ -63,23 +63,22 @@ class Gis:
 
         if attribute is 'name':
             self.H = self.H.subgraph([c for c, a in self.H.node.items() if
-                            ord((a['name'])[0]) >= ord(lowerBound[0])
-                            and
-                            ord((a['name'])[0]) <= ord(upperBound[0])])
+                                      ord(lowerBound[0]) <= ord((a['name'])[0])
+                                      <= ord(upperBound[0])])
         elif attribute is 'state':
             self.H = self.H.subgraph([c for c, a in self.H.node.items() if
-                            ord((a['state'])[0]) >= ord(lowerBound[0])
-                            and
-                            ord((a['state'])[0]) <= ord(upperBound[0])])
+                                      ord(lowerBound[0]) <= ord((a['state'])[0])
+                                      <= ord(upperBound[0])])
         elif attribute is 'latitude':
-            self.H = self.H.subgraph([c for c, a in self.H.node.items(
-            ) if a['lat'] >= lowerBound and a['lat'] <= upperBound])
+            self.H = self.H.subgraph([c for c, a in self.H.node.items() if
+                                    lowerBound <= a['latitude'] <= upperBound])
         elif attribute is 'longitude':
-            self.H = self.H.subgraph([c for c, a in self.H.node.items(
-            ) if a['lon'] >= lowerBound and a['lon'] <= upperBound])
+            self.H = self.H.subgraph([c for c, a in self.H.node.items() if
+                                    lowerBound <= a['longitude'] <= upperBound])
         elif attribute is 'population':
-           self.H = self.H.subgraph([c for c, a in self.H.node.items(
-            ) if a['pop'] >= lowerBound and a['pop'] <= upperBound])
+           self.H = self.H.subgraph([c for c, a in self.H.node.items() if
+                                    lowerBound <= a['population'] <=
+                                    upperBound])
         else:
             print('"{}" is not a valid attribute.\nPlease enter one of '
                   '"name", "state", "latitude", "longitude" or '
@@ -148,27 +147,31 @@ class Gis:
         # attribute, which should behave exactly like printCities("names").
         # The second parameter choice ('S' or 'F') determines whether the
         # requested output should be displayed in "short" form or "full" form.
-        self.selcities = dict()
-        for c in self.H.nodes():
-            self.selcities[c] = {'name': c, 'state': self.H.node[c]['state'],
-                                 'latitude': self.H.node[c]['lat'],
-                                 'longitude': self.H.node[c]['lon'],
-                                 'population': self.H.node[c]['pop']}
-        if attribute is 'name':
-            if choice is 'F':
-                for c in sorted(self.selcities):
-                    print("{} [{:.2f}, {:.2f}], {}".format(c,
-                            self.selcities[c]['latitude'],
-                            self.selcities[c]['longitude'],
-                            self.selcities[c]['population']))
+
+        if choice is 'F':
+            if attribute is 'name':
+                for city in sorted(self.H.nodes()):
+                    print("{} [{:.2f}, {:.2f}], {}".format(city,
+                                                self.H.node[city]['latitude'],
+                                                self.H.node[city]['longitude'],
+                                                self.H.node[city]['population']))
             else:
-                for c in sorted(self.selcities):
-                    print(c)
-        elif attribute is 'state':
-            if choice is 'F':
-                for c in
-
-
+                for city, data in sorted(nx.get_node_attributes(self.H,
+                                        attribute).items(), key=itemgetter(1),
+                                        reverse=True):
+                    print("{} [{:.2f}, {:.2f}], {}".format(city,
+                                                self.H.node[city]['latitude'],
+                                                self.H.node[city]['longitude'],
+                                                self.H.node[city]['population']))
+        else:
+            if attribute is 'name':
+                for city in sorted(self.H.nodes()):
+                    print(city)
+            else:
+                for city, data in sorted(nx.get_node_attributes(self.H,
+                                        attribute).items(), key=itemgetter(1),
+                                        reverse=True):
+                    print("{}".format(self.H.node[city]['name']))
 
     def printEdges(self):
         # This should print all selected edges, in no particular order.
