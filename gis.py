@@ -1,6 +1,7 @@
 import os
 import networkx as nx
 from decimal import Decimal, getcontext
+from operator import itemgetter
 
 
 class Gis:
@@ -12,7 +13,8 @@ class Gis:
 
         # Create an empty graph with no nodes or edges
         self.G = nx.Graph()
-        citylist = []
+        self.citylist = []
+        citystate = ''
         getcontext().prec = 5
 
         with open('gis.dat') as gisf:
@@ -26,21 +28,24 @@ class Gis:
                     (city, state) = citystate.split(', ')
                     (latlon, pop) = citydata.split(']')
                     (lat, lon) = latlon.split(',')
-                    G.add_node(city, name=city, state=state,
+                    self.G.add_node(citystate, name=citystate, state=state,
                                lat=float(Decimal(lat) * Decimal(0.01)),
                                lon=float(Decimal(lon) * Decimal(0.01)),
                                pop=int(pop.rstrip()))
-                    citylist.insert(0, city)
+                    self.citylist.insert(0, citystate)
                 if line[0].isdigit():
                     i=0
                     distlist = line.split()
                     for dist in distlist:
                         int(dist)
-                        G.add_edge(city, citylist[i], weight=dist)
+                        self.G.add_edge(citystate, self.citylist[i],
+                                        weight=dist)
                         i=i+1
 
         self.H = self.G
-        self.allcities = self.G.nodes()
+        #self.allcities = self.G.nodes()
+        #self.allcities.sort()
+        self.citylist.sort()
         self.alledges = self.G.edges()
 
     def selectCities(self, attribute, lowerBound, upperBound):
@@ -87,8 +92,7 @@ class Gis:
         # The allcities list created during initialization is iterated
         # through rather than iterating through calls to G as a matter of
         # computational efficiency.
-        self.H.add_nodes_from(self.allcities)
-        return ()
+        self.H.add_nodes_from(self.citylist)
 
     def unselectAllCities(self):
         # Un-select all cities.
@@ -98,7 +102,6 @@ class Gis:
         # computational efficiency for spatial efficiency).
         nlist = self.H.nodes()
         self.H.remove_nodes_from(nlist)
-        return ()
 
     def selectEdges(self, lowerBound, upperBound):
         # Here lowerBound and upperBound specify a "distance range."
@@ -115,7 +118,6 @@ class Gis:
         # through rather than iterating through calls to G as a matter of
         # computational efficiency.
         self.H.add_edges_from(self.alledges)
-        return ()
 
     def unselectAllEdges(self):
         # Un-select all edges.
@@ -125,7 +127,6 @@ class Gis:
         # computational efficiency for spatial efficiency).
         elist = self.H.edges()
         self.H.remove_edges_from(elist)
-        return ()
 
     def makeGraph(self):
         # This method makes and returns a graph whose vertex set is the set of
@@ -139,7 +140,7 @@ class Gis:
 
         return ()
 
-    def printCities(self, attribute, choice):
+    def printCities(self, attribute='name', choice='S'):
         # As before, attribute can be one of "name", "state", "latitude",
         # "longitude", and "population." This methods prints all selected
         # cities sorted in increasing order by the given attribute.
@@ -147,8 +148,27 @@ class Gis:
         # attribute, which should behave exactly like printCities("names").
         # The second parameter choice ('S' or 'F') determines whether the
         # requested output should be displayed in "short" form or "full" form.
+        self.selcities = dict()
+        for c in self.H.nodes():
+            self.selcities[c] = {'name': c, 'state': self.H.node[c]['state'],
+                                 'latitude': self.H.node[c]['lat'],
+                                 'longitude': self.H.node[c]['lon'],
+                                 'population': self.H.node[c]['pop']}
+        if attribute is 'name':
+            if choice is 'F':
+                for c in sorted(self.selcities):
+                    print("{} [{:.2f}, {:.2f}], {}".format(c,
+                            self.selcities[c]['latitude'],
+                            self.selcities[c]['longitude'],
+                            self.selcities[c]['population']))
+            else:
+                for c in sorted(self.selcities):
+                    print(c)
+        elif attribute is 'state':
+            if choice is 'F':
+                for c in
 
-        return ()
+
 
     def printEdges(self):
         # This should print all selected edges, in no particular order.
