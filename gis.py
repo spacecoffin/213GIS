@@ -43,8 +43,6 @@ class Gis:
                         i=i+1
 
         self.H = self.G
-        #self.allcities = self.G.nodes()
-        #self.allcities.sort()
         self.citylist.sort()
         self.alledges = self.G.edges()
 
@@ -155,8 +153,7 @@ class Gis:
                                                 self.H.node[city]['population']))
             else:
                 for city, data in sorted(nx.get_node_attributes(self.H,
-                                        attribute).items(), key=itemgetter(1),
-                                        reverse=True):
+                                        attribute).items(), key=itemgetter(1)):
                     print("{} [{:.2f}, {:.2f}], {}".format(city,
                                                 self.H.node[city]['latitude'],
                                                 self.H.node[city]['longitude'],
@@ -167,8 +164,7 @@ class Gis:
                     print(city)
             else:
                 for city, data in sorted(nx.get_node_attributes(self.H,
-                                        attribute).items(), key=itemgetter(1),
-                                        reverse=True):
+                                        attribute).items(), key=itemgetter(1)):
                     print("{}".format(self.H.node[city]['name']))
 
     def printEdges(self):
