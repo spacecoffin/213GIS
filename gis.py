@@ -1,6 +1,6 @@
 import os
 import networkx as nx
-# TODO: use decimals/floats for lat/lon or ints as in description?
+# TODO: use decimals/floats for lat/lon -or- ints as in description?
 #from decimal import Decimal, getcontext
 from operator import itemgetter
 
@@ -76,24 +76,27 @@ class Gis:
 
         # TODO: Add type assertions?
 
-        if attribute is 'name':
-            lowerBound = lowerBound.title()
-            upperBound = upperBound.title()
+        if attribute in {'name', 'state'}:
+            if attribute is 'name':
+                lowerBound = lowerBound.title()
+                upperBound = upperBound.title()
+            else:
+                lowerBound = lowerBound[0:2].upper()
+                upperBound = upperBound[0:2].upper()
+        # TODO: I wonder if the above returns a soft copy, potentially
+        # causing a problem with above if statement assigning upper to lower...
+        # Maybe that should be copied rather than redirected?
             self.H = self.H.subgraph([c for c, a in self.H.node.items() if
-                                      lowerBound <= a['name'] <= upperBound
-                                      or a['name'].startswith(lowerBound or
-                                                               upperBound)])
-        elif attribute is 'state':
-            lowerBound = lowerBound[0:2].upper()
-            upperBound = upperBound[0:2].upper()
-            self.H = self.H.subgraph([c for c, a in self.H.node.items() if
-                                      lowerBound <= a['state'] <= upperBound
-                                      or a['state'].startswith(lowerBound or
-                                                               upperBound)])
+                                      lowerBound <= a[attribute] <= upperBound
+                                      or a[attribute].startswith(lowerBound
+                                                                 or
+                                                                 upperBound)])
         elif attribute in {'latitude', 'longitude', 'population'}:
+            if attribute in {'latitude', 'longitude'}:
+                lowerBound *= 100
+                upperBound *= 100
             self.H = self.H.subgraph([c for c, a in self.H.node.items() if
                                       lowerBound <= a[attribute] <= upperBound])
-
         else:
             print('"{}" is not a valid attribute.\nPlease enter one of '
                   '"name", "state", "latitude", "longitude" or '
@@ -125,8 +128,9 @@ class Gis:
         # 500, this method will select all edges between pairs of cities
         # whose distance (as specified in gis.dat) is at most 500 miles.
         # Assume that initially no edges are selected.
-
-        return ()
+        #FIXME: this is edges you doofus
+        self.H = self.H.subgraph([e for e, a in self.H.node.items() if
+                                      lowerBound <= a['weight'] <= upperBound])
 
     def selectAllEdges(self):
         # Select all edges.
@@ -200,10 +204,15 @@ class Gis:
     def printEdges(self):
         # This should print all selected edges, in no particular order.
 
-        return ()
+        # TODO: is this the format it should be in? No formatting, etc?
+        for edge in self.H.edges():
+            print(edge)
 
     def printPopulationDistr(self, value='range'):
         if value is 'range':
+            pass
+
+            """
             self.H.subgraph([c for c, a in self.H.node.items() if
                              lowerBound <= a['population'] <=
                              upperBound])
@@ -212,7 +221,7 @@ class Gis:
             for city in self.H.nodes(data=True):
                 if self.H.node[city]['population'] <= i * 20000:
                     count += 1
-                """# call selectCities for each range!
+                # call selectCities for each range!
 
 
            self.H = self.H.subgraph([c for c, a in self.H.node.items() if
