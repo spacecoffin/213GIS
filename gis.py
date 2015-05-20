@@ -13,7 +13,8 @@ class Gis:
 
         # Create an empty graph with no nodes or edges
         self.G = nx.Graph()
-        self.citylist = []
+        self.H = nx.Graph()
+        citylist = []
         citystate = ''
         getcontext().prec = 5
 
@@ -32,21 +33,22 @@ class Gis:
                                latitude=float(Decimal(lat) * Decimal(0.01)),
                                longitude=float(Decimal(lon) * Decimal(0.01)),
                                population=int(pop.rstrip()))
-                    self.citylist.insert(0, citystate)
+                    citylist.insert(0, citystate)
                 if line[0].isdigit():
-                    i=0
+                    i = 1
                     distlist = line.split()
                     for dist in distlist:
                         int(dist)
-                        self.G.add_edge(citystate, self.citylist[i],
+                        self.G.add_edge(citystate, citylist[i],
                                         weight=dist)
-                        i=i+1
+                        i += 1
 
-        self.H = self.G
-        self.citylist.sort()
-        self.alledges = self.G.edges()
+        # Create list of all cities and edges for later use to avoid
+        # reiterating through graph in subsequent functions calls.
+        self.allCities = self.G.nodes(data=True)
+        self.allEdges = self.G.edges(data=True)
 
-    def selectCities(self, attribute, lowerBound, upperBound):
+    def selectCities(self, attribute, lowerBound, upperBound=None):
         # This method will be used to "select" a set of cities that satisfy
         # some conditions.
         # The argument attribute is a string that can be one of "name",
@@ -58,6 +60,12 @@ class Gis:
         # it selects only from those cities that are already selected. This
         # allows us to use selectCities repeatedly to select a set of cities
         # that satisfy several constraints.
+
+        if upperBound is None:
+            upperBound = lowerBound
+
+
+
 
         if attribute is 'name':
             self.H = self.H.subgraph([c for c, a in self.H.node.items() if
@@ -82,21 +90,25 @@ class Gis:
                   '"name", "state", "latitude", "longitude" or '
                   '"population".'.format(attribute))
 
+
     def selectAllCities(self):
         # Select all cities.
+        # TODO: clean up this documentation
         # The allcities list created during initialization is iterated
         # through rather than iterating through calls to G as a matter of
         # computational efficiency.
-        self.H.add_nodes_from(self.citylist)
+
+        self.H.add_nodes_from(self.allCities)
 
     def unselectAllCities(self):
         # Un-select all cities.
+        # TODO: clean up this documentation
         # Create a list of all cities in the graph which is then iterated
         # through for removal. This ensures that only currently selected
         # cities are iterated through, not all cities (a trade off of
         # computational efficiency for spatial efficiency).
-        nlist = self.H.nodes()
-        self.H.remove_nodes_from(nlist)
+
+        self.H.clear()
 
     def selectEdges(self, lowerBound, upperBound):
         # Here lowerBound and upperBound specify a "distance range."
@@ -112,7 +124,7 @@ class Gis:
         # The alledges list created during initialization is iterated
         # through rather than iterating through calls to G as a matter of
         # computational efficiency.
-        self.H.add_edges_from(self.alledges)
+        self.H.add_edges_from(self.allEdges)
 
     def unselectAllEdges(self):
         # Un-select all edges.
@@ -171,3 +183,20 @@ class Gis:
         # This should print all selected edges, in no particular order.
 
         return ()
+
+    def printPopulationDistr(self, value='range'):
+        if value is 'range':
+            self.H.subgraph([c for c, a in self.H.node.items() if
+                                    lowerBound <= a['population'] <=
+                                    upperBound])
+            i=1
+            count = 0
+            for city in self.H.nodes(data=True):
+                if self.H.node[city]['population'] <= i * 20000:
+                    count += 1
+                """# call selectCities for each range!
+
+
+           self.H = self.H.subgraph([c for c, a in self.H.node.items() if
+           lowerBound <= a['population'] <= upperBound])
+            """
