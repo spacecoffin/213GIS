@@ -12,14 +12,11 @@ class Gis:
 
         # Create empty dictionaries to be filled with all cities and edges
         self.allCities = dict()
-        self.allEdges = dict()  # this should be implemented as a dict of
-                                # arrays of 3-tuples 'e' = [v,u,weight]
-                                # with each 3-tuple bucketed by key=weight into
-                                # its corresponding array
+        self.allEdges = []
 
         # Create empty dictionaries to be used for selected cities and edges
         self.selCities = dict()
-        self.selEdges = dict()
+        self.selEdges = []
 
         # Create empty list to iterate through in parsing of edges
         citylist = []
@@ -44,11 +41,7 @@ class Gis:
                     i = 1
                     distlist = line.split()
                     for dist in distlist:
-                        if not int(dist) in self.allEdges:
-                            self.allEdges[int(dist)] = [[citylist[i],name]]
-                        else:
-                            self.allEdges[int(dist)] = self.allEdges.get(
-                                int(dist)).append[citylist[i],name]
+                        self.allEdges.insert(i-1, [name, citylist[i], int(dist)])
                         i += 1
 
     def selectCities(self, attribute, lowerBound, upperBound=None):
@@ -70,9 +63,6 @@ class Gis:
             elif type(lowerBound) is int:
                 upperBound = float("inf")
 
-        # TODO: is there a way to turn 'name' and 'state' into int vals
-        # generically?
-
         # TODO: Add type assertions?
 
         if attribute in {'name', 'state'}:
@@ -86,29 +76,22 @@ class Gis:
         # causing a problem with above if statement assigning upper to lower...
         # Maybe that should be copied rather than redirected?
 
-        # FIXME: to convert to dict format, we want to just pop nodes that do
-        # NOT match the criteria
-
-        # For dictionaries, the new dictionary comprehension syntax
-        # {key: val for (key, val) in zip(keys, vals)} works like the form
-        # dict(zip(keys, vals)), and {x: f(x) for x in items} is like the
-        # generator expression dict((x, f(x)) for x in items
-
-            self.selCities = {(c, d): (c, d) for (c, d) in
-                              self.selCities.items() if
-                              lowerBound <= d[attribute] <= upperBound or
-                              d[attribute.startswith(lowerBound or upperBound)]}
+            self.selCities = {c: d for (c, d) in self.selCities.items() if
+                              lowerBound <= self.selCities[c][attribute] <=
+                              upperBound or self.selCities[c][
+                                  attribute].startswith(lowerBound or
+                                                        upperBound)}
         elif attribute in {'latitude', 'longitude', 'population'}:
             if attribute in {'latitude', 'longitude'}:
                 lowerBound *= 100
                 upperBound *= 100
-            self.H = self.H.subgraph([c for c, a in self.H.node.items() if
-                                      lowerBound <= a[attribute] <= upperBound])
+            self.selCities = {c: d for (c, d) in self.selCities.items() if
+                              lowerBound <= self.selCities[c][attribute] <=
+                              upperBound}
         else:
             print('"{}" is not a valid attribute.\nPlease enter one of '
                   '"name", "state", "latitude", "longitude" or '
                   '"population".'.format(attribute))
-
 
     def selectAllCities(self):
         # Select all cities.
@@ -117,7 +100,7 @@ class Gis:
         # through rather than iterating through calls to G as a matter of
         # computational efficiency.
 
-        self.H.add_nodes_from(self.allCities)
+        self.selCities.update(self.allCities)
 
     def unselectAllCities(self):
         # Un-select all cities.
@@ -127,7 +110,7 @@ class Gis:
         # cities are iterated through, not all cities (a trade off of
         # computational efficiency for spatial efficiency).
 
-        self.H.clear()
+        self.selCities.clear()
 
     def selectEdges(self, lowerBound, upperBound):
         # Here lowerBound and upperBound specify a "distance range."
@@ -136,8 +119,8 @@ class Gis:
         # whose distance (as specified in gis.dat) is at most 500 miles.
         # Assume that initially no edges are selected.
         #FIXME: this is edges you doofus
-        self.H = self.H.subgraph([e for e, a in self.H.node.items() if
-                                      lowerBound <= a['weight'] <= upperBound])
+        self.selEdges = [e for e in self.selEdges if lowerBound <= e[2] <=
+                         upperBound]
 
     def selectAllEdges(self):
         # Select all edges.
@@ -146,7 +129,7 @@ class Gis:
         # through rather than iterating through calls to G as a matter of
         # computational efficiency.
 
-        self.H.add_edges_from(self.allEdges)
+        self.selEdges.extend(self.allEdges)
 
     def unselectAllEdges(self):
         # Un-select all edges.
@@ -156,7 +139,7 @@ class Gis:
         # edges are iterated through, not all edges (a trade off of
         # computational efficiency for spatial efficiency).
 
-        self.H.remove_edges_from(self.H.edges())
+        self.selEdges.clear()
 
     def makeGraph(self):
         # This method makes and returns a graph whose vertex set is the set of
@@ -175,45 +158,42 @@ class Gis:
         # requested output should be displayed in "short" form or "full" form.
 
         if choice is 'F':
+            """
             if attribute is 'name':
-                for city in sorted(self.H.nodes()):
+                for city in sorted(self.selCities):
                     print("{} [{}, {}], {}".format(city,
-                                                           self.H.node[city][
+                                                           self.selCities[city][
                                                                'latitude'],
-                                                           self.H.node[city][
+                                                           self.selCities[city][
                                                                'longitude'],
-                                                           self.H.node[city][
+                                                           self.selCities[city][
                                                                'population']))
             else:
-                # TODO: Is nx.get_node_attributes(self.H, attribute)
-                # equivalent to self.H.nodes(data=True) <- pulling only
-                # 'attribute'?
-                for city, d in sorted(nx.get_node_attributes(self.H,
-                                                             attribute).items(),
-                        key=itemgetter(1)):
-                    print("{} [{}, {}], {}".format(city,
-                                                           self.H.node[city][
-                                                               'latitude'],
-                                                           self.H.node[city][
-                                                               'longitude'],
-                                                           self.H.node[city][
-                                                               'population']))
+            """
+
+            for data in sorted(self.selCities.values(), key=itemgetter(
+                    attribute)):
+                print("{} [{}, {}], {}".format(self.selCities[data['name']][
+                                                   'name'], self.selCities[
+                    data['name']]['latitude'], self.selCities[data['name']][
+                    'longitude'], self.selCities[data['name']]['population']))
         else:
+            """
             if attribute is 'name':
-                for city in sorted(self.H.nodes()):
+                for city in sorted(self.selCities):
                     print(city)
             else:
-                for city, data in sorted(nx.get_node_attributes(self.H,
-                                                                attribute).items(),
-                        key=itemgetter(1)):
-                    print("{}".format(self.H.node[city]['name']))
+            """
+            for data in sorted(self.selCities.values(), key=itemgetter(
+                    attribute)):
+                    print("{}".format(self.selCities[data['name']]['name']))
 
     def printEdges(self):
         # This should print all selected edges, in no particular order.
 
         # TODO: is this the format it should be in? No formatting, etc?
-        for edge in self.H.edges():
-            print(edge)
+        for edge in self.selEdges:
+            print("{} miles from {} -- > {}".format(edge[2], edge[0], edge[1]))
 
     def printPopulationDistr(self, value='range'):
         if value is 'range':
