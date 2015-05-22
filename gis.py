@@ -1,7 +1,5 @@
 import os
 import networkx as nx
-# TODO: use decimals/floats for lat/lon -or- ints as in description?
-#from decimal import Decimal, getcontext
 from operator import itemgetter
 
 
@@ -12,43 +10,46 @@ class Gis:
         # check if the file exists
         assert os.path.exists('gis.dat'), 'gis.dat does not exist.'
 
-        # Create an empty graph with no nodes or edges
-        self.G = nx.Graph()
-        self.H = nx.Graph()
+        # Create empty dictionaries to be filled with all cities and edges
+        self.allCities = dict()
+        self.allEdges = dict()  # this should be implemented as a dict of
+                                # arrays of 3-tuples 'e' = [v,u,weight]
+                                # with each 3-tuple bucketed by key=weight into
+                                # its corresponding array
+
+        # Create empty dictionaries to be used for selected cities and edges
+        self.selCities = dict()
+        self.selEdges = dict()
+
+        # Create empty list to iterate through in parsing of edges
         citylist = []
-        citystate = ''
+        # Preempt "referenced before assignment" complaint in 2nd 'if' below
+        name = ''
 
         with open('testgis.dat') as gisf:
-            # getcontext().prec = 5
             for line in gisf.readlines():
                 if line.startswith('*'):
                     continue
                 line.strip()
                 if line[0].isalpha():
-                    (citystate, citydata) = line.split('[')
-                    (city, state) = citystate.split(', ')
+                    (name, citydata) = line.split('[')
+                    (city, state) = name.split(', ')
                     (latlon, pop) = citydata.split(']')
                     (lat, lon) = latlon.split(',')
-                    # TODO: decide if the auxilliary 'name' attribute is needed.
-                    self.G.add_node(citystate, state=state, name=citystate,
-                                    latitude=int(lat),
-                                    # float(Decimal(lat) * Decimal(0.01)),
-                                    longitude=int(lon),
-                                    population=int(pop.rstrip()))
-                    citylist.insert(0, citystate)
+                    self.allCities[name] = dict(zip([
+                        'name', 'state', 'latitude', 'longitude', 'population'],
+                        [name, state, int(lat), int(lon), int(pop.rstrip())]))
+                    citylist.insert(0, name)
                 if line[0].isdigit():
                     i = 1
                     distlist = line.split()
                     for dist in distlist:
-                        int(dist)
-                        self.G.add_edge(citystate, citylist[i],
-                                        weight=dist)
+                        if not int(dist) in self.allEdges:
+                            self.allEdges[int(dist)] = [[citylist[i],name]]
+                        else:
+                            self.allEdges[int(dist)] = self.allEdges.get(
+                                int(dist)).append[citylist[i],name]
                         i += 1
-
-        # Create list of all cities and edges for later use to avoid
-        # reiterating through graph in subsequent functions calls.
-        self.allCities = self.G.nodes(data=True)
-        self.allEdges = self.G.edges(data=True)
 
     def selectCities(self, attribute, lowerBound, upperBound=None):
         # This method will be used to "select" a set of cities that satisfy
@@ -69,8 +70,6 @@ class Gis:
             elif type(lowerBound) is int:
                 upperBound = float("inf")
 
-        # TODO: simplify/redo this scheme to eliminate cases
-
         # TODO: is there a way to turn 'name' and 'state' into int vals
         # generically?
 
@@ -86,11 +85,19 @@ class Gis:
         # TODO: I wonder if the above returns a soft copy, potentially
         # causing a problem with above if statement assigning upper to lower...
         # Maybe that should be copied rather than redirected?
-            self.H = self.H.subgraph([c for c, a in self.H.node.items() if
-                                      lowerBound <= a[attribute] <= upperBound
-                                      or a[attribute].startswith(lowerBound
-                                                                 or
-                                                                 upperBound)])
+
+        # FIXME: to convert to dict format, we want to just pop nodes that do
+        # NOT match the criteria
+
+        # For dictionaries, the new dictionary comprehension syntax
+        # {key: val for (key, val) in zip(keys, vals)} works like the form
+        # dict(zip(keys, vals)), and {x: f(x) for x in items} is like the
+        # generator expression dict((x, f(x)) for x in items
+
+            self.selCities = {(c, d): (c, d) for (c, d) in
+                              self.selCities.items() if
+                              lowerBound <= d[attribute] <= upperBound or
+                              d[attribute.startswith(lowerBound or upperBound)]}
         elif attribute in {'latitude', 'longitude', 'population'}:
             if attribute in {'latitude', 'longitude'}:
                 lowerBound *= 100
