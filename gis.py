@@ -41,7 +41,7 @@ class Gis:
                     i = 1
                     distlist = line.split()
                     for dist in distlist:
-                        self.allEdges.insert(i-1, [name, citylist[i], int(dist)])
+                        self.allEdges.insert(i-1, (name, citylist[i], int(dist)))
                         i += 1
 
     def selectCities(self, attribute, lowerBound, upperBound=None):
@@ -118,7 +118,6 @@ class Gis:
         # 500, this method will select all edges between pairs of cities
         # whose distance (as specified in gis.dat) is at most 500 miles.
         # Assume that initially no edges are selected.
-        #FIXME: this is edges you doofus
         self.selEdges = [e for e in self.selEdges if lowerBound <= e[2] <=
                          upperBound]
 
@@ -146,7 +145,11 @@ class Gis:
         # selected cities and whose edge set is all selected edges connecting
         # pairs of selected cities.
 
-        return self.H
+        G = nx.Graph()
+        G.add_weighted_edges_from(self.selEdges)
+        G.remove_nodes_from([city for city in self.allCities if city not in
+                             self.selCities])
+        return G
 
     def printCities(self, attribute='name', choice='S'):
         # As before, attribute can be one of "name", "state", "latitude",
@@ -193,7 +196,8 @@ class Gis:
 
         # TODO: is this the format it should be in? No formatting, etc?
         for edge in self.selEdges:
-            print("{} miles from {} -- > {}".format(edge[2], edge[0], edge[1]))
+            print("{:>20} < -- {:<4} mi -- > {:>20}".format(edge[0], edge[2],
+                                                            edge[1]))
 
     def printPopulationDistr(self, value='range'):
         if value is 'range':
