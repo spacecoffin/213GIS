@@ -23,7 +23,7 @@ class Gis:
         # Preempt "referenced before assignment" complaint in 2nd 'if' below
         name = ''
 
-        with open('testgis.dat') as gisf:
+        with open('gis.dat') as gisf:
             for line in gisf.readlines():
                 if line.startswith('*'):
                     continue
@@ -161,19 +161,6 @@ class Gis:
         # requested output should be displayed in "short" form or "full" form.
 
         if choice is 'F':
-            """
-            if attribute is 'name':
-                for city in sorted(self.selCities):
-                    print("{} [{}, {}], {}".format(city,
-                                                           self.selCities[city][
-                                                               'latitude'],
-                                                           self.selCities[city][
-                                                               'longitude'],
-                                                           self.selCities[city][
-                                                               'population']))
-            else:
-            """
-
             for data in sorted(self.selCities.values(), key=itemgetter(
                     attribute)):
                 print("{} [{}, {}], {}".format(self.selCities[data['name']][
@@ -181,12 +168,6 @@ class Gis:
                     data['name']]['latitude'], self.selCities[data['name']][
                     'longitude'], self.selCities[data['name']]['population']))
         else:
-            """
-            if attribute is 'name':
-                for city in sorted(self.selCities):
-                    print(city)
-            else:
-            """
             for data in sorted(self.selCities.values(), key=itemgetter(
                     attribute)):
                     print("{}".format(self.selCities[data['name']]['name']))
@@ -199,22 +180,25 @@ class Gis:
             print("{:>20} < -- {:<4} mi -- > {:>20}".format(edge[0], edge[2],
                                                             edge[1]))
 
-    def printPopulationDistr(self, value='range'):
-        if value is 'range':
-            pass
+    def printPopulationDistr(self, value=20000):
+        if not self.selCities:
+            print('No cities found\n')
+        else:
+            lowerBound = 0
+            upperBound = value
+            distrCities = [c['population'] for c in self.selCities.values()]
+            while distrCities:
+                thisDistr = [c for c in distrCities if c < upperBound]
+                if thisDistr:
+                    print("[{}, {}]  :  {}".format(lowerBound, upperBound,
+                                                   len(thisDistr)))
+                distrCities[0:len(thisDistr)] = []
+                lowerBound += value
+                upperBound += value
 
-            """
-            self.H.subgraph([c for c, a in self.H.node.items() if
-                             lowerBound <= a['population'] <=
-                             upperBound])
-            i = 1
-            count = 0
-            for city in self.H.nodes(data=True):
-                if self.H.node[city]['population'] <= i * 20000:
-                    count += 1
-                # call selectCities for each range!
-
-
-           self.H = self.H.subgraph([c for c, a in self.H.node.items() if
-           lowerBound <= a['population'] <= upperBound])
-            """
+    def printPopulatedStates(self, num):
+        print("{} most populated states.\n{}".format(num, '-' * 43))
+        for data in (sorted(self.selCities.values(), key=itemgetter(
+                'population'), reverse=True))[0:num]:
+            print("{} {}".format(self.selCities[data['name']]['state'],
+                                 self.selCities[data['name']]['population']))
