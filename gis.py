@@ -22,6 +22,7 @@ class Gis:
         citylist = []
         # Preempt "referenced before assignment" complaint in 2nd 'if' below
         name = ''
+        i = 1
 
         with open('gis.dat') as gisf:
             for line in gisf.readlines():
@@ -29,6 +30,7 @@ class Gis:
                     continue
                 line.strip()
                 if line[0].isalpha():
+                    i = 1
                     (name, citydata) = line.split('[')
                     (city, state) = name.split(', ')
                     (latlon, pop) = citydata.split(']')
@@ -38,7 +40,6 @@ class Gis:
                         [name, state, int(lat), int(lon), int(pop.rstrip())]))
                     citylist.insert(0, name)
                 if line[0].isdigit():
-                    i = 1
                     distlist = line.split()
                     for dist in distlist:
                         self.allEdges.insert(i-1, (name, citylist[i], int(dist)))
@@ -144,7 +145,7 @@ class Gis:
         # This method makes and returns a graph whose vertex set is the set of
         # selected cities and whose edge set is all selected edges connecting
         # pairs of selected cities.
-
+        # FIXME: Adds edges between all
         G = nx.Graph()
         G.add_weighted_edges_from(self.selEdges)
         G.remove_nodes_from([city for city in self.allCities if city not in
@@ -177,7 +178,7 @@ class Gis:
 
         # TODO: is this the format it should be in? No formatting, etc?
         for edge in self.selEdges:
-            print("{:>20} < -- {:<4} mi -- > {:>20}".format(edge[0], edge[2],
+            print("{:>22} < -- {:<4} mi -- > {:<22}".format(edge[0], edge[2],
                                                             edge[1]))
 
     def printPopulationDistr(self, value=20000):
@@ -202,3 +203,31 @@ class Gis:
                 'population'), reverse=True))[0:num]:
             print("{} {}".format(self.selCities[data['name']]['state'],
                                  self.selCities[data['name']]['population']))
+
+    def testMinMaxConsDistance(self):
+        print("Goal:  minimize the maximum distance between any pair of\n "
+              "consecutive cities on path from source to destination.\n")
+        G = nx.minimum_spanning_tree(self.makeGraph())
+        while True:
+            source = input("Source (City, State):  ")
+            target = input("Target (City, State):  ")
+            if not target:
+                break
+            # FIXME: nx prempts our else clause
+            if nx.has_path(G, source, target):
+                path = nx.shortest_path(G, source, target)
+                H = G.copy()
+                H.remove_nodes_from([city for city in H if city not in path])
+                cost = max(H.edges(data=True), key=lambda t: t[2].get('weight'))
+                print("Cost of optimal solution: {}".format(cost[2]['weight']))
+                print("Path from {} to {}:".format(source, target))
+                for city in path:
+                    print(city)
+            else:
+                print("No path found")
+            print('\n{}\n'.format('*' * 36))
+        print('\n{}\n'.format('*' * 36))
+
+
+
+
