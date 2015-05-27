@@ -24,7 +24,7 @@ class Gis:
         name = ''
         i = 1
 
-        with open('testgis.dat') as gisf:
+        with open('gis.dat') as gisf:
             for line in gisf.readlines():
                 if line.startswith('*'):
                     continue
@@ -91,20 +91,11 @@ class Gis:
 
     def selectAllCities(self):
         # Select all cities.
-        # TODO: clean up this documentation
-        # The allcities list created during initialization is iterated
-        # through rather than iterating through calls to G as a matter of
-        # computational efficiency.
 
         self.selCities.update(self.allCities)
 
     def unselectAllCities(self):
         # Un-select all cities.
-        # TODO: clean up this documentation
-        # Create a list of all cities in the graph which is then iterated
-        # through for removal. This ensures that only currently selected
-        # cities are iterated through, not all cities (a trade off of
-        # computational efficiency for spatial efficiency).
 
         self.selCities.clear()
 
@@ -119,20 +110,11 @@ class Gis:
 
     def selectAllEdges(self):
         # Select all edges.
-        # TODO: clean up this documentation
-        # The alledges list created during initialization is iterated
-        # through rather than iterating through calls to G as a matter of
-        # computational efficiency.
 
         self.selEdges.extend(self.allEdges)
 
     def unselectAllEdges(self):
         # Un-select all edges.
-        # TODO: clean up this documentation
-        # Create a list of all edges in the graph which is then iterated
-        # through for removal. This ensures that only currently selected
-        # edges are iterated through, not all edges (a trade off of
-        # computational efficiency for spatial efficiency).
 
         self.selEdges.clear()
 
@@ -171,7 +153,6 @@ class Gis:
     def printEdges(self):
         # This should print all selected edges, in no particular order.
 
-        # TODO: is this the format it should be in? No formatting, etc?
         for edge in self.selEdges:
             print("{:>22} < -- {:<4} mi -- > {:<22}".format(edge[0], edge[2],
                                                             edge[1]))
@@ -256,8 +237,8 @@ class Gis:
             # four cities.
             print("as follows.\n")
             while len(tsp) > 3:
-                print("{} -- > {} -- > {} -- > {}".format(tsp[0], tsp[1],
-                                                          tsp[2], tsp[3]))
+                print("{} -- > {} -- > {} -- > {} -- >".format(tsp[0], tsp[1],
+                                                               tsp[2], tsp[3]))
                 del tsp[0:4]
             if tsp:
                 while len(tsp) > 1:
