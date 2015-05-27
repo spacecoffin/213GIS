@@ -122,7 +122,6 @@ class Gis:
         # This method makes and returns a graph whose vertex set is the set of
         # selected cities and whose edge set is all selected edges connecting
         # pairs of selected cities.
-        # FIXME: Adds edges between all
         G = nx.Graph()
         G.add_weighted_edges_from(self.selEdges)
         G.remove_nodes_from([city for city in self.allCities if city not in
@@ -175,10 +174,36 @@ class Gis:
 
     def printPopulatedStates(self, num):
         print("{} most populated states.\n{}".format(num, '-' * 43))
+        stpop = dict()
+        for data in self.selCities.values():
+            state = data['state']
+            pop = data['population']
+            if state in stpop:
+                stpop[state] += pop
+            else:
+                stpop[state] = pop
+        for data in sorted(list(stpop.items()), key=itemgetter(1),
+                reverse=True)[0:num]:
+            print("{} {}".format(data[0], data[1]))
+
+        """
+        for data in self.selCities.values():
+            if self.selCities[data['name']]['state'] in stpop:
+                stpop[self.selCities[data['name']]['state']] += \
+                    self.selCities[data['name']]['population']
+            else:
+                stpop[self.selCities[data['name']]['state']] = \
+                    self.selCities[data['name']]['population']
+        for data in (sorted(stpop, key=itemgetter('population'),
+                            reverse=True)[0:num]):
+            print("{} {}".format(data))
+
+
         for data in (sorted(self.selCities.values(), key=itemgetter(
                 'population'), reverse=True))[0:num]:
             print("{} {}".format(self.selCities[data['name']]['state'],
                                  self.selCities[data['name']]['population']))
+        """
 
     def testMinMaxConsDistance(self):
         print("Goal:  minimize the maximum distance between any pair of\n "
