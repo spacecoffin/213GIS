@@ -240,8 +240,8 @@ class Gis:
             # four cities.
             print("as follows.\n")
             while len(tsp) > 3:
-                print("{} -- > {} -- > {} -- > {} -- >".format(tsp[0], tsp[1],
-                                                               tsp[2], tsp[3]))
+                print("{:^22} -- > {:^22} -- > {:^22} -- > {:^22} -- >".format(
+                    tsp[0], tsp[1], tsp[2], tsp[3]))
                 del tsp[0:4]
             if tsp:
                 while len(tsp) > 1:
