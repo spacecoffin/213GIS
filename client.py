@@ -66,7 +66,8 @@ def main():
     gsystem.unselectAllEdges()
     gsystem.tour('Yakima, WA')
     print(delimiter)
-    
+
+    """
     #### EXPERIMENT 6 ####
     gsystem.selectAllCities()
     gsystem.selectAllEdges()
@@ -74,5 +75,6 @@ def main():
     
     gsystem.minCut()
     print(delimiter)
+    """
     
 main()

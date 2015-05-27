@@ -24,7 +24,7 @@ class Gis:
         name = ''
         i = 1
 
-        with open('gis.dat') as gisf:
+        with open('testgis.dat') as gisf:
             for line in gisf.readlines():
                 if line.startswith('*'):
                     continue
@@ -206,22 +206,21 @@ class Gis:
         while True:
             source = input("Source (City, State):  ")
             target = input("Target (City, State):  ")
+            print()
             if not source or not target:
                 break
-            # FIXME: nx prempts our else clause
             elif nx.has_path(G, source, target):
                 path = nx.shortest_path(G, source, target)
                 H = G.copy()
                 H.remove_nodes_from([city for city in H if city not in path])
                 cost = max(H.edges(data=True), key=lambda t: t[2].get('weight'))
                 print("Cost of optimal solution: {}".format(cost[2]['weight']))
-                print("Path from {} to {}:".format(source, target))
+                print("\nPath from {} to {}:".format(source, target))
                 for city in path:
                     print(city)
             else:
                 print("No path found")
             print('\n{}\n'.format('*' * 36))
-        print('\n{}\n'.format('*' * 36))
 
     def tour(self, start):
         # This method outputs a traveling salesman tour on the selected
@@ -244,9 +243,9 @@ class Gis:
                 for city in options:
                     if G[current][city]['weight'] < minn[1]:
                         minn = [city, G[current][city]['weight']]
-                if minn[0] == start:
-                    print("not possible.")
-                    return None
+                #if minn[0] == start:
+                #    print("not possible.")
+                #    break
                 total += minn[1]
                 tsp.append(minn[0])
                 current = minn[0]
