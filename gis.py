@@ -116,7 +116,7 @@ class Gis:
     def unselectAllEdges(self):
         # Un-select all edges.
 
-        self.selEdges.clear()
+        self.selEdges = []
 
     def makeGraph(self):
         # This method makes and returns a graph whose vertex set is the set of
