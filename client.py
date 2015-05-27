@@ -1,4 +1,4 @@
-import gis
+from gis import Gis
 
 def main():
     gsystem = Gis()

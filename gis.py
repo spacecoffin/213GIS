@@ -64,8 +64,6 @@ class Gis:
             elif type(lowerBound) is int:
                 upperBound = float("inf")
 
-        # TODO: Add type assertions?
-
         if attribute in {'name', 'state'}:
             if attribute is 'name':
                 lowerBound = lowerBound.title()
@@ -73,9 +71,6 @@ class Gis:
             else:
                 lowerBound = lowerBound[0:2].upper()
                 upperBound = upperBound[0:2].upper()
-        # TODO: I wonder if the above returns a soft copy, potentially
-        # causing a problem with above if statement assigning upper to lower...
-        # Maybe that should be copied rather than redirected?
 
             self.selCities = {c: d for (c, d) in self.selCities.items() if
                               lowerBound <= self.selCities[c][attribute] <=
@@ -210,11 +205,9 @@ class Gis:
         G = nx.minimum_spanning_tree(self.makeGraph())
         while True:
             source = input("Source (City, State):  ")
-            if not source:
-                break
+            if source.isspace(): break
             target = input("Target (City, State):  ")
-            if not target:
-                break
+            if target.isspace(): break
             # FIXME: nx prempts our else clause
             if nx.has_path(G, source, target):
                 path = nx.shortest_path(G, source, target)
