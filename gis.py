@@ -162,7 +162,8 @@ class Gis:
         else:
             lowerBound = 0
             upperBound = value
-            distrCities = [c['population'] for c in self.selCities.values()]
+            distrCities = sorted([c['population'] for c in
+                                  self.selCities.values()])
             while distrCities:
                 thisDistr = [c for c in distrCities if c < upperBound]
                 if thisDistr:
