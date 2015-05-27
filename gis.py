@@ -187,25 +187,6 @@ class Gis:
                 reverse=True)[0:num]:
             print("{} {}".format(data[0], data[1]))
 
-        """
-        for data in self.selCities.values():
-            if self.selCities[data['name']]['state'] in stpop:
-                stpop[self.selCities[data['name']]['state']] += \
-                    self.selCities[data['name']]['population']
-            else:
-                stpop[self.selCities[data['name']]['state']] = \
-                    self.selCities[data['name']]['population']
-        for data in (sorted(stpop, key=itemgetter('population'),
-                            reverse=True)[0:num]):
-            print("{} {}".format(data))
-
-
-        for data in (sorted(self.selCities.values(), key=itemgetter(
-                'population'), reverse=True))[0:num]:
-            print("{} {}".format(self.selCities[data['name']]['state'],
-                                 self.selCities[data['name']]['population']))
-        """
-
     def testMinMaxConsDistance(self):
         print("Goal:  minimize the maximum distance between any pair of\n "
               "consecutive cities on path from source to destination.\n")
@@ -250,14 +231,10 @@ class Gis:
                 for city in options:
                     if G[current][city]['weight'] < minn[1]:
                         minn = [city, G[current][city]['weight']]
-                #if minn[0] == start:
-                #    print("not possible.")
-                #    break
                 total += minn[1]
                 tsp.append(minn[0])
                 current = minn[0]
                 unvisited.remove(current)
-                # max(G[current] in unvisited, key=lambda t: t[1].get('weight'))
             # In the output, exactly four cities are printed on each line except
             # possibly the last line of the output which may have fewer than
             # four cities.
@@ -268,8 +245,8 @@ class Gis:
                 del tsp[0:4]
             if tsp:
                 while len(tsp) > 1:
-                    print("{} -- > ".format(tsp.pop(0)))
-                print("{}".format(tsp.pop(0)))
+                    print("{:^22} -- > ".format(tsp.pop(0)))
+                print("{:^22}".format(tsp.pop(0)))
             print("\nTour length:  {}".format(total))
         else:
             print("not possible.")
