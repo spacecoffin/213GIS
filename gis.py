@@ -210,6 +210,8 @@ class Gis:
         G = nx.minimum_spanning_tree(self.makeGraph())
         while True:
             source = input("Source (City, State):  ")
+            if not source:
+                break
             target = input("Target (City, State):  ")
             if not target:
                 break
@@ -228,6 +230,47 @@ class Gis:
             print('\n{}\n'.format('*' * 36))
         print('\n{}\n'.format('*' * 36))
 
-
-
-
+    def tour(self, start):
+        # This method outputs a traveling salesman tour on the selected
+        # cities (and using the selected edges) starting from start.
+        G = self.makeGraph()
+        print("Traveling Salesman Tour starting from {} is ".format(start),
+              end='')
+        if (start in G) and (min(list(nx.degree(G).values())) >= 2):
+            # The tour is computed using the nearest neighbor heuristic, i.e.,
+            # at any point in the tour, the next city chosen is the closest to
+            # current city among all the unvisited cities.
+            unvisited = G.nodes()
+            current = start
+            total = 0
+            tsp = [current]
+            while unvisited:
+                options = [city for city in list(G[current].keys()) if city in
+                        unvisited]
+                minn = ['', float('inf')]
+                for city in options:
+                    if G[current][city]['weight'] < minn[1]:
+                        minn = [city, G[current][city]['weight']]
+                if minn[0] == start:
+                    print("not possible.")
+                    return None
+                total += minn[1]
+                tsp.append(minn[0])
+                current = minn[0]
+                unvisited.remove(current)
+                # max(G[current] in unvisited, key=lambda t: t[1].get('weight'))
+            # In the output, exactly four cities are printed on each line except
+            # possibly the last line of the output which may have fewer than
+            # four cities.
+            print("as follows.\n")
+            while len(tsp) > 3:
+                print("{} -- > {} -- > {} -- > {}".format(tsp[0], tsp[1],
+                                                          tsp[2], tsp[3]))
+                del tsp[0:4]
+            if tsp:
+                while len(tsp) > 1:
+                    print("{} -- > ".format(tsp.pop(0)))
+                print("{}".format(tsp.pop(0)))
+            print("\nTour length:  {}".format(total))
+        else:
+            print("not possible.")
