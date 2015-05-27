@@ -205,11 +205,11 @@ class Gis:
         G = nx.minimum_spanning_tree(self.makeGraph())
         while True:
             source = input("Source (City, State):  ")
-            if source.isspace(): break
             target = input("Target (City, State):  ")
-            if target.isspace(): break
+            if not source or not target:
+                break
             # FIXME: nx prempts our else clause
-            if nx.has_path(G, source, target):
+            elif nx.has_path(G, source, target):
                 path = nx.shortest_path(G, source, target)
                 H = G.copy()
                 H.remove_nodes_from([city for city in H if city not in path])
