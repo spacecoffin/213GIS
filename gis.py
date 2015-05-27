@@ -234,7 +234,11 @@ class Gis:
                 total += minn[1]
                 tsp.append(minn[0])
                 current = minn[0]
-                unvisited.remove(current)
+                try:
+                    unvisited.remove(current)
+                except ValueError:
+                    print("not possible.")
+                    return None
             # In the output, exactly four cities are printed on each line except
             # possibly the last line of the output which may have fewer than
             # four cities.
